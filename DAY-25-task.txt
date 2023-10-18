@@ -1,0 +1,60 @@
+ CRUD Functionalities:
+
+
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+const App = () => {
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState({
+    title: "",
+    description: "",
+    status: "not completed",
+  });
+  const [filter, setFilter] = useState("all");
+  useEffect(() => {
+    axios.get("https://jsonplaceholder.typicode.com/todos").then((response) => {
+      setTodos(response.data);
+    });
+  }, []);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewTodo({ ...newTodo, [name]: value });
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios
+      .post("https://jsonplaceholder.typicode.com/todos", newTodo)
+      .then((response) => {
+        setTodos([response.data, ...todos]);
+        setNewTodo({
+          title: "",
+          description: "",
+          status: "not completed",
+        });
+      });
+  };
+  const handleEdit = (todo) => {
+    setNewTodo(todo);
+  };
+  const handleDelete = (todo) => {
+    axios.delete(`https://jsonplaceholder.typicode.com/todos/${todo.id}`).then(() => {
+      setTodos(todos.filter((t) => t.id !== todo.id));
+    });
+  };
+  const handleStatusChange = (todo) => {
+    axios
+      .patch(`https://jsonplaceholder.typicode.com/todos/${todo.id}`, {
+        status: todo.status === "completed" ? "not completed" : "completed",
+      })
+      .then(() => {
+        setTodos(
+          todos.map((t) => (t.id === todo.id ? { ...t, status: todo.status === "completed" ? "not completed" : "completed" } : t))
+        );
+      });
+  };
+  const filteredTodos =
+    filter === "all"
+      ? todos
+      : filter === "completed"
+      ? todos.
